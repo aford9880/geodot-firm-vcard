@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style id="critical-css">
+    /* Критические стили до загрузки основного CSS: гасят белый flash и сразу показывают прелоадер */
+    html, body { margin: 0; background: #0b1418; color: #e6f0ee; }
+    body:not(.site--ready) > *:not(.preloader):not(.cursor-glow):not(.cursor-dot) { visibility: hidden; }
+    .preloader {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: #0b1418;
+      background-image:
+        radial-gradient(circle at 30% 25%, rgba(45,212,167,0.10), transparent 55%),
+        radial-gradient(circle at 70% 75%, rgba(255,107,53,0.08), transparent 55%);
+      color: #8fa5a2; font-family: 'Space Grotesk', system-ui, sans-serif;
+    }
+    .preloader__inner { width: min(560px, 90vw); padding: 2rem 1.5rem; }
+    .preloader__brand { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; font-weight: 700; color: #e6f0ee; }
+    .preloader__icon { color: #2dd4a7; filter: drop-shadow(0 0 8px rgba(45,212,167,0.6)); animation: criticalSpin 2.4s linear infinite; }
+    @keyframes criticalSpin { to { transform: rotate(360deg); } }
+    .preloader__name-accent { color: #ff6b35; }
+    .preloader__log { display: flex; flex-direction: column; gap: 0.4rem; min-height: 8rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+    .preloader__line { display: flex; gap: 0.5rem; opacity: 0; animation: criticalLineIn 0.3s ease forwards; }
+    .preloader__prompt { color: #2dd4a7; }
+    .preloader__text { color: #8fa5a2; flex: 1; }
+    .preloader__ok { color: #44ff88; }
+    .preloader__bar { margin-top: 1.25rem; height: 2px; width: 100%; background: #1f3a3f; border-radius: 2px; overflow: hidden; }
+    .preloader__bar-fill { height: 100%; width: 0%; background: linear-gradient(135deg,#2dd4a7,#ff6b35); box-shadow: 0 0 10px rgba(45,212,167,0.5); transition: width 0.35s ease; }
+    @keyframes criticalLineIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+  <noscript>
+    <style>
+      body > * { visibility: visible !important; }
+      .preloader { display: none !important; }
+    </style>
+  </noscript>
+
+  <title>ГеоТочка — геодезия, межевание, кадастр, топосъёмка в Москве и по РФ</title>
+  <meta name="description" content="ГеоТочка: геодезические изыскания, межевание, кадастровые работы, топосъёмка, вынос границ в натуру. Выезд в день обращения по Москве и МО, командировки по РФ. Лицензия, точность, сроки." />
+  <meta name="keywords" content="геодезия, межевание, кадастр, топосъёмка, вынос границ, землеустройство, геоподоснова, Москва, Подмосковье, ГеоТочка" />
+  <meta name="author" content="ГеоТочка" />
+
+  <meta property="og:title" content="ГеоТочка — геодезия и землеустройство" />
+  <meta property="og:description" content="Топосъёмка, межевание, кадастр, вынос границ. Выезд в день обращения по Москве и МО, командировки по РФ." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://geotochka.ru" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:image" content="https://geotochka.ru/og.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ГеоТочка — геодезия и землеустройство" />
+  <meta name="twitter:description" content="Топосъёмка, межевание, кадастр, вынос границ. Выезд в день обращения." />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1418'/%3E%3Cpath d='M16 4L7 27l9-4 9 4z' fill='none' stroke='%232dd4a7' stroke-width='2.2' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='14' r='2.4' fill='%23ff6b35'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "ГеоТочка",
+    "description": "Геодезические и кадастровые работы: топосъёмка, межевание, кадастр, вынос границ, геоподоснова",
+    "url": "https://geotochka.ru",
+    "telephone": "+7-495-123-45-67",
+    "email": "zakaz@geotochka.ru",
+    "image": "https://geotochka.ru/og.png",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Москва",
+      "streetAddress": "Профсоюзная ул., 84"
+    },
+    "areaServed": [
+      { "@type": "AdministrativeArea", "name": "Москва" },
+      { "@type": "AdministrativeArea", "name": "Московская область" },
+      { "@type": "Country", "name": "Россия" }
+    ],
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+      "opens": "08:00",
+      "closes": "21:00"
+    },
+    "priceRange": "₽₽",
+    "sameAs": [
+      "https://t.me/geotochka",
+      "https://vk.com/geotochka"
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <div class="cursor-glow" aria-hidden="true"></div>
+  <div class="cursor-dot" aria-hidden="true"></div>
+
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader__inner">
+      <div class="preloader__brand">
+        <span class="preloader__icon">◈</span>
+        <span class="preloader__name">Гео<span class="preloader__name-accent">Точка</span></span>
+      </div>
+      <div class="preloader__log" id="preloader-log"></div>
+      <div class="preloader__bar"><div class="preloader__bar-fill" id="preloader-bar"></div></div>
+    </div>
+  </div>
+
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#" class="logo" aria-label="ГеоТочка — на главную">
+        <span class="logo__icon" aria-hidden="true">◈</span>
+        <span class="logo__text">Гео<span class="logo__accent">Точка</span></span>
+      </a>
+      <nav class="nav" aria-label="Основная навигация">
+        <ul class="nav__list">
+          <li><a href="#services" class="nav__link">Услуги</a></li>
+          <li><a href="#objects" class="nav__link">Объекты</a></li>
+          <li><a href="#zones" class="nav__link">Зоны выезда</a></li>
+          <li><a href="#calculator" class="nav__link">Стоимость</a></li>
+          <li><a href="#process" class="nav__link">Как мы работаем</a></li>
+          <li><a href="#faq" class="nav__link">FAQ</a></li>
+        </ul>
+      </nav>
+      <a href="#contact" class="btn btn--primary header__cta">
+        <span class="btn__icon" aria-hidden="true">◈</span>
+        Заказать выезд
+      </a>
+      <button class="burger" aria-label="Меню" aria-expanded="false">
+        <span class="burger__line"></span>
+        <span class="burger__line"></span>
+        <span class="burger__line"></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ HERO с полноэкранной картой ============ -->
+    <section class="hero" id="hero">
+      <div id="hero-map" class="hero__map" aria-label="Интерактивная карта зон обслуживания"></div>
+      <div class="hero__scrim" aria-hidden="true"></div>
+
+      <div class="hero__topbar">
+        <div class="hero__brand-badge">
+          <span class="live-dot"></span>
+          <span>Геодезическая компания • лицензия Росреестра</span>
+        </div>
+        <form class="hero__search" id="hero-search" role="search">
+          <input type="text" id="hero-coords" class="hero__search-input"
+                 placeholder="Адрес или координаты объекта…"
+                 aria-label="Адрес или координаты" autocomplete="off" />
+          <button type="submit" class="hero__search-btn" aria-label="Найти">
+            <span aria-hidden="true">⌖</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="hero__overlay">
+        <span class="hero__eyebrow">Точка отсчёта вашего участка</span>
+        <h1 class="hero__title">
+          Геодезия, межевание<br />
+          и кадастр — <span class="hero__accent">с точностью до сантиметра</span>
+        </h1>
+        <p class="hero__subtitle">
+          Выезд в день обращения по Москве и МО. Командировки по всей РФ.
+          Подкаточный расчёт стоимости за 2 минуты.
+        </p>
+        <div class="hero__actions">
+          <a href="#calculator" class="btn btn--primary btn--lg">
+            <span class="btn__icon" aria-hidden="true">⌖</span>
+            Рассчитать стоимость
+          </a>
+          <a href="#zones" class="btn btn--ghost btn--lg">Зоны выезда на карте</a>
+        </div>
+        <div class="hero__stats">
+          <div class="stat">
+            <span class="stat__num" data-count="1200">0</span><span class="stat__sym">+</span>
+            <span class="stat__label">объектов выполнено</span>
+          </div>
+          <div class="stat">
+            <span class="stat__num" data-count="2">0</span><span class="stat__sym"> см</span>
+            <span class="stat__label">погрешность GNSS</span>
+          </div>
+          <div class="stat">
+            <span class="stat__num" data-count="24">0</span><span class="stat__sym"> ч</span>
+            <span class="stat__label">средний срок выезда</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__livecard" id="hero-livecard">
+        <div class="livecard__header">
+          <span class="livecard__pulse" aria-hidden="true"></span>
+          <span class="livecard__title">Бригада на выезде</span>
+        </div>
+        <div class="livecard__row"><span>Объект:</span><strong id="lc-object">—</strong></div>
+        <div class="livecard__row"><span>Работа:</span><strong id="lc-task">—</strong></div>
+        <div class="livecard__row"><span>Зона:</span><strong id="lc-zone">—</strong></div>
+        <div class="livecard__row"><span>Статус:</span><strong id="lc-status">—</strong></div>
+      </div>
+
+      <button class="hero__scroll" aria-label="Прокрутить вниз">
+        <span class="hero__scroll-line"></span>
+      </button>
+    </section>
+
+    <!-- ============ LIVE-ТЕЛЕМЕТРИЯ ============ -->
+    <section class="ticker" id="ticker" aria-label="Журнал последних работ">
+      <div class="ticker__inner">
+        <span class="ticker__live"><span class="ticker__pulse" aria-hidden="true"></span>журнал работ</span>
+        <ul class="ticker__list" id="ticker-list"></ul>
+      </div>
+    </section>
+
+    <!-- ============ УСЛУГИ ============ -->
+    <section class="services section" id="services">
+      <div class="container">
+        <div class="section__header">
+          <span class="section__tag">Услуги</span>
+          <h2 class="section__title">Полный цикл геодезических работ</h2>
+          <p class="section__desc">От топосъёмки до постановки на кадастровый учёт — без посредников и переплат.</p>
+        </div>
+        <div class="services__grid" id="services-grid"></div>
+      </div>
+    </section>
+
+    <!-- ============ ВЫПОЛНЕННЫЕ ОБЪЕКТЫ ============ -->
+    <section class="objects section" id="objects">
+      <div class="container">
+        <div class="section__header">
+          <span class="section__tag">Объекты</span>
+          <h2 class="section__title">Что мы измерили за последний год</h2>
+          <p class="section__desc">Каждый объект — реальная работа с координатами. Нажмите «Показать на карте».</p>
+        </div>
+        <ul class="objects__filters" id="objects-filters" role="tablist" aria-label="Фильтр объектов"></ul>
+        <div class="objects__grid" id="objects-grid"></div>
+        <div class="objects__tile-row">
+          <div class="tile"><span class="tile__num"><span data-count="1200">0</span>+</span><span class="tile__label">объектов</span></div>
+          <div class="tile"><span class="tile__num"><span data-count="31000">0</span></span><span class="tile__label">точек вынесено</span></div>
+          <div class="tile"><span class="tile__num"><span data-count="86">0</span>%</span><span class="tile__label">заказов со срочным выездом</span></div>
+          <div class="tile"><span class="tile__num">2<span class="tile__sym"> см</span></span><span class="tile__label">точность съёмки</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ЗОНЫ ОБСЛУЖИВАНИЯ ============ -->
+    <section class="zones section" id="zones">
+      <div class="container">
+        <div class="section__header">
+          <span class="section__tag">Зоны выезда</span>
+          <h2 class="section__title">Где мы работаем и как быстро выезжаем</h2>
+          <p class="section__desc">Кликните по зоне — покажем время реакции и тариф. Зоны рисуем прямо по GeoJSON.</p>
+        </div>
+        <div class="zones__panel">
+          <div class="zones__map-wrap">
+            <div id="zones-map" class="zones__map" aria-label="Карта зон обслуживания"></div>
+          </div>
+          <aside class="zones__controls" id="zones-controls"></aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ КАЛЬКУЛЯТОР ============ -->
+    <section class="calc section" id="calculator">
+      <div class="container">
+        <div class="section__header">
+          <span class="section__tag">Калькулятор</span>
+          <h2 class="section__title">Прикиньте бюджет за минуту</h2>
+          <p class="section__desc">Расчёт предварительный. Точную смету дадим после выезда на объект — бесплатно.</p>
+        </div>
+        <div class="calc__panel">
+          <div class="calc__steps">
+            <div class="calc__group">
+              <span class="calc__label">Тип работ</span>
+              <div class="calc__chips" id="calc-type" role="radiogroup" aria-label="Тип работ"></div>
+            </div>
+            <div class="calc__group">
+              <span class="calc__label">Площадь съёмки</span>
+              <div class="calc__slider">
+                <input type="range" id="calc-area" min="0" max="100" step="1" value="1" aria-label="Площадь в гектарах" />
+                <div class="calc__slider-val"><span id="calc-area-val">1</span> га</div>
+              </div>
+            </div>
+            <div class="calc__group">
+              <span class="calc__label">Срочность</span>
+              <div class="calc__chips calc__chips--urgency" id="calc-urgency" role="radiogroup" aria-label="Срочность"></div>
+            </div>
+            <div class="calc__group">
+              <span class="calc__label">Зона выезда</span>
+              <div class="calc__chips" id="calc-zone" role="radiogroup" aria-label="Зона выезда"></div>
+            </div>
+          </div>
+          <div class="calc__result">
+            <span class="calc__result-eyebrow">Предварительно</span>
+            <div class="calc__price" id="calc-price">—</div>
+            <div class="calc__sub" id="calc-sub">Выберите тип работ</div>
+            <ul class="calc__breakdown" id="calc-breakdown"></ul>
+            <a href="#contact" class="btn btn--primary btn--lg calc__cta" id="calc-cta">Получить точную смету</a>
+            <p class="calc__note">Расчёт носит справочный характер и не является публичной офертой.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ПРЕИМУЩЕСТВА ============ -->
+    <section class="advantages section" id="advantages">
+      <div class="container">
+        <div class="section__header">
+          <span class="section__tag">Почему мы</span>
+          <h2 class="section__title">За что нас рекомендуют заказчикам</h2>
+        </div>
+        <div class="advantages__grid" id="advantages-grid"></div>
+      </div>
+    </section>
+
+    <!-- ============ ПРОЦЕСС ============ -->
+    <section class="process section" id="process">
+      <div class="container">
+        <div class="section__header">
+          <span class="section__tag">Процесс</span>
+          <h2 class="section__title">Как проходит заказ от заявки до акта</h2>
+        </div>
+        <ol class="process__timeline" id="process-timeline"></ol>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="faq section" id="faq">
+      <div class="container">
+        <div class="section__header">
+          <span class="section__tag">FAQ</span>
+          <h2 class="section__title">Частые вопросы</h2>
+        </div>
+        <div class="faq__search">
+          <input type="text" class="faq__search-input" id="faq-search" placeholder="Поиск по вопросам…" aria-label="Поиск по вопросам" />
+          <span class="faq__search-icon" aria-hidden="true">⌕</span>
+        </div>
+        <div class="faq__list" id="faq-list" role="list"></div>
+      </div>
+    </section>
+
+    <!-- ============ ФОРМА ЗАЯВКИ ============ -->
+    <section class="contact section" id="contact">
+      <div class="container">
+        <div class="contact__inner">
+          <div class="contact__info">
+            <span class="section__tag">Заявка</span>
+            <h2 class="section__title">Закажите выезд бригады</h2>
+            <p class="contact__text">Заполните форму — менеджер перезвонит за 15 минут в рабочее время и согласует дату выезда.</p>
+            <address class="contact__details">
+              <div class="contact__detail"><span class="contact__detail-icon">◈</span> <a href="mailto:zakaz@geotochka.ru">zakaz@geotochka.ru</a></div>
+              <div class="contact__detail"><span class="contact__detail-icon">☏</span> <a href="tel:+74951234567">+7 (495) 123-45-67</a></div>
+              <div class="contact__detail"><span class="contact__detail-icon">⌖</span> <span>Москва, Профсоюзная ул., 84</span></div>
+              <div class="contact__detail"><span class="contact__detail-icon">✈</span> <a href="https://t.me/geotochka" target="_blank" rel="noopener">@geotochka</a></div>
+            </address>
+            <div class="contact__hours">
+              <span class="contact__hours-dot"></span>
+              Пн–Сб 08:00–21:00 • Вс — по срочным заявкам
+            </div>
+          </div>
+          <form class="contact__form" id="contact-form" novalidate>
+            <div class="form__group">
+              <label for="form-name" class="form__label">Ваше имя</label>
+              <input type="text" id="form-name" class="form__input" placeholder="Иван Петров" required autocomplete="name" />
+              <span class="form__error">Введите имя</span>
+            </div>
+            <div class="form__group">
+              <label for="form-phone" class="form__label">Телефон</label>
+              <input type="tel" id="form-phone" class="form__input" placeholder="+7 (999) 123-45-67" required autocomplete="tel" />
+              <span class="form__error">Введите корректный телефон</span>
+            </div>
+            <div class="form__group">
+              <label for="form-work" class="form__label">Тип работ</label>
+              <select id="form-work" class="form__input form__select" required>
+                <option value="" disabled selected>Выберите работу…</option>
+                <option>Топосъёмка</option>
+                <option>Межевание</option>
+                <option>Кадастр (постановка на учёт)</option>
+                <option>Геоподоснова</option>
+                <option>Вынос границ в натуру</option>
+                <option>Другое / консультация</option>
+              </select>
+              <span class="form__error">Выберите тип работ</span>
+            </div>
+            <div class="form__group">
+              <label for="form-address" class="form__label">Адрес или район объекта</label>
+              <input type="text" id="form-address" class="form__input" placeholder="г. Истра, СНТ «Сосновый»" required />
+              <span class="form__error">Укажите адрес объекта</span>
+            </div>
+            <div class="form__group form__group--row">
+              <label for="form-area" class="form__label">Площадь (га)</label>
+              <input type="number" id="form-area" class="form__input" min="0" step="0.01" placeholder="0,5" />
+            </div>
+            <label class="form__consent">
+              <input type="checkbox" id="form-consent" checked />
+              <span>Согласен на обработку персональных данных</span>
+            </label>
+            <button type="submit" class="btn btn--primary btn--lg form__submit" id="form-submit">
+              <span class="btn__icon" aria-hidden="true">➤</span>
+              Отправить заявку
+            </button>
+            <div class="form__status" id="form-status" hidden></div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a href="#" class="logo">
+          <span class="logo__icon" aria-hidden="true">◈</span>
+          <span class="logo__text">Гео<span class="logo__accent">Точка</span></span>
+        </a>
+        <p class="footer__tagline">Геодезия, межевание и кадастр с точностью до сантиметра</p>
+      </div>
+      <div class="footer__links">
+        <h4 class="footer__heading">Услуги</h4>
+        <ul>
+          <li><a href="#services">Топосъёмка</a></li>
+          <li><a href="#services">Межевание</a></li>
+          <li><a href="#services">Кадастр</a></li>
+          <li><a href="#services">Вынос границ</a></li>
+          <li><a href="#services">Геоподоснова</a></li>
+        </ul>
+      </div>
+      <div class="footer__links">
+        <h4 class="footer__heading">Документы</h4>
+        <ul>
+          <li><a href="#">Политика конфиденциальности</a></li>
+          <li><a href="#">Согласие на обработку ПДн</a></li>
+          <li><a href="#">Реквизиты (ООО «ГеоТочка»)</a></li>
+        </ul>
+      </div>
+      <div class="footer__social">
+        <h4 class="footer__heading">Мы на связи</h4>
+        <div class="social-links">
+          <a href="https://t.me/geotochka" target="_blank" rel="noopener" class="social-link" aria-label="Telegram">✈</a>
+          <a href="#" class="social-link" aria-label="ВКонтакте">⛰</a>
+          <a href="tel:+74951234567" class="social-link" aria-label="Телефон">☏</a>
+        </div>
+        <p class="footer__license">Лицензия Росреестра № 00-00-000 от 2019 г.</p>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="container footer__bottom-inner">
+        <p>&copy; 2026 ООО «ГеоТочка». Все права защищены.</p>
+        <p class="footer__made">Сделано на <span aria-hidden="true">◈</span> Vite + Leaflet + SCSS</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Модальное окно с мини-картой объекта -->
+  <div class="obj-modal" id="obj-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="obj-modal-title">
+    <div class="obj-modal__backdrop" data-close="1"></div>
+    <div class="obj-modal__dialog">
+      <button class="obj-modal__close" aria-label="Закрыть" data-close="1">✕</button>
+      <div class="obj-modal__head">
+        <span class="obj-modal__tag" id="obj-modal-type">—</span>
+        <h3 class="obj-modal__title" id="obj-modal-title">—</h3>
+        <p class="obj-modal__meta" id="obj-modal-meta">—</p>
+      </div>
+      <div id="obj-map" class="obj-modal__map" aria-label="Карта объекта"></div>
+      <div class="obj-modal__body">
+        <div class="obj-modal__row"><span>Площадь / длина:</span><strong id="obj-modal-area">—</strong></div>
+        <div class="obj-modal__row"><span>Срок:</span><strong id="obj-modal-duration">—</strong></div>
+        <div class="obj-modal__row"><span>Статус:</span><strong id="obj-modal-status">—</strong></div>
+        <p class="obj-modal__result" id="obj-modal-result">—</p>
+        <a href="#contact" class="btn btn--primary obj-modal__cta" data-close="1">Хочу так же</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/js/main.js"></script>
+</body>
+</html>
