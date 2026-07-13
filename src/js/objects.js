@@ -64,30 +64,133 @@ function render(grid, filter) {
   });
 }
 
-// Процедурно рисуем «топо-фрагмент» карты для карточки объекта
+// Процедурно рисуем «топо-фрагмент» карты для карточки объекта.
+// Диспетчер по категории рисует уникальную геометрию; пин-маркер и
+// подпись координат — общие для всех (см. .obj-card__coords в разметке).
 function genTopo(o) {
   const [lat, lng] = o.coords;
-  // детерминированный сдвиг позиции пина на 16:9 холсте
   const px = 50 + (lng - 37.6) * 8;
   const py = 60 + (55.7 - lat) * 12;
   const cx = Math.max(14, Math.min(86, px));
   const cy = Math.max(20, Math.min(80, py));
   const seed = Math.abs((lat * 1000 + lng) | 0) % 999;
   const rng = mulberry(seed);
-  const lines = 5;
-  let paths = '';
-  for (let i = 0; i < lines; i++) {
-    const y = 18 + i * 14;
-    const a = 8 + rng() * 22, b = 60 + rng() * 40, c = 120 + rng() * 40, d = 190 + rng() * 28;
-    paths += `<path d="M-10 ${y} C ${a} ${y - 8}, ${b} ${y + 6}, ${c} ${y - 4} S ${d} ${y + 4}, 260 ${y}" />`;
+  const cat = o.category || 'topo';
+  let inner = '';
+  switch (cat) {
+    case 'cadastral': inner = genCadastral(rng); break;
+    case 'linear':    inner = genLinear(rng); break;
+    case 'staking':   inner = genStaking(rng, lat); break;
+    case 'volumes':   inner = genVolumes(rng); break;
+    default:          inner = genTopoRelief(rng);
   }
-  return `<svg viewBox="0 0 240 135" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    ${paths}
+  return `<svg class="topo topo-${cat}" viewBox="0 0 240 135" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    ${inner}
     <circle class="pin-ring" cx="${cx}" cy="${cy}" r="10" />
     <circle class="pin-ring" cx="${cx}" cy="${cy}" r="5" />
     <path class="pin" d="M${cx} ${cy - 6} L${cx + 5} ${cy} L${cx} ${cy + 6} L${cx - 5} ${cy} Z" />
     <circle cx="${cx}" cy="${cy}" r="1.8" fill="#0b1418" />
   </svg>`;
+}
+
+// Топосъёмка: горизонтали рельефа + сетка квадратов нивелирования с высотными отметками
+function genTopoRelief(rng) {
+  let s = '';
+  const lines = 6;
+  for (let i = 0; i < lines; i++) {
+    const y = 16 + i * 13;
+    const a = 10 + rng() * 30, b = 70 + rng() * 40, c = 130 + rng() * 40, d = 200 + rng() * 30;
+    s += `<path class="topo-relief__contour" d="M-10 ${y} C ${a} ${y - 9}, ${b} ${y + 7}, ${c} ${y - 5} S ${d} ${y + 5}, 260 ${y}" />`;
+  }
+  // сетка квадратов нивелирования
+  const step = 20, gx = 6, gy = 98, cols = 12, rows = 2;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = gx + c * step, y = gy + r * step;
+      if (x > 232 || y > 130) continue;
+      s += `<rect class="topo-relief__grid" x="${x}" y="${y}" width="${step}" height="${step}" />`;
+    }
+  }
+  // высотные отметки на узлах сетки
+  const marks = [[10, 104], [50, 104], [90, 104], [150, 104], [190, 104], [30, 124], [110, 124], [170, 124]];
+  marks.forEach(([x, y], i) => {
+    const h = 178 + i * 3 + Math.floor(rng() * 4);
+    s += `<text class="topo-relief__mark" x="${x}" y="${y + 3}">${h}.${Math.floor(rng() * 9)}</text>`;
+  });
+  return s;
+}
+
+// Межевание / кадастр: четырёхугольник участка с межевыми знаками по углам + диагонали-привязки
+function genCadastral(rng) {
+  const pts = [
+    [38 + rng() * 18, 26 + rng() * 14],
+    [182 + rng() * 18, 22 + rng() * 14],
+    [198 + rng() * 16, 98 + rng() * 16],
+    [46 + rng() * 16, 108 + rng() * 12],
+  ];
+  const poly = pts.map(p => `${p[0]} ${p[1]}`).join(' ');
+  let s = `<polygon class="topo-cadastral__plot" points="${poly}" />`;
+  s += `<line class="topo-cadastral__tie" x1="${pts[0][0]}" y1="${pts[0][1]}" x2="${pts[2][0]}" y2="${pts[2][1]}" />`;
+  s += `<line class="topo-cadastral__tie" x1="${pts[1][0]}" y1="${pts[1][1]}" x2="${pts[3][0]}" y2="${pts[3][1]}" />`;
+  pts.forEach((p, i) => {
+    s += `<rect class="topo-cadastral__mon" x="${p[0] - 3}" y="${p[1] - 3}" width="6" height="6" />`;
+    s += `<text class="topo-cadastral__num" x="${p[0] + 6}" y="${p[1] - 4}">н${i + 1}</text>`;
+  });
+  return s;
+}
+
+// Линейный объект: трасса-полилиния с пикетами ПК0…ПК5 и поперечными сечениями
+function genLinear(rng) {
+  const pts = [[8, 70 + rng() * 10]];
+  const n = 5;
+  for (let i = 1; i <= n; i++) {
+    pts.push([10 + i * (220 / n), 28 + rng() * 70]);
+  }
+  pts.push([232, 60 + rng() * 20]);
+  const d = 'M' + pts.map(p => `${p[0]} ${p[1]}`).join(' L ');
+  let s = `<path class="topo-linear__trace" d="${d}" />`;
+  pts.forEach((p, i) => {
+    if (i === 0 || i === pts.length - 1) return;
+    s += `<line class="topo-linear__cross" x1="${p[0]}" y1="${p[1] - 11}" x2="${p[0]}" y2="${p[1] + 11}" />`;
+    s += `<circle class="topo-linear__pk" cx="${p[0]}" cy="${p[1]}" r="2.4" />`;
+    s += `<text class="topo-linear__label" x="${p[0] - 7}" y="${p[1] - 14}">ПК${i}</text>`;
+  });
+  return s;
+}
+
+// Вынос в натуру: крупный план угла участка — колышек, две стороны, засечка-привязка
+function genStaking(rng, lat) {
+  const corner = [62, 92];
+  const dir1 = [222, 30 + rng() * 28];
+  const dir2 = [72 + rng() * 30, 12];
+  let s = '';
+  s += `<line class="topo-staking__side" x1="${corner[0]}" y1="${corner[1]}" x2="${dir1[0]}" y2="${dir1[1]}" />`;
+  s += `<line class="topo-staking__side" x1="${corner[0]}" y1="${corner[1]}" x2="${dir2[0]}" y2="${dir2[1]}" />`;
+  const off = [corner[0] + 22, corner[1] - 22];
+  s += `<line class="topo-staking__tie" x1="${corner[0]}" y1="${corner[1]}" x2="${off[0]}" y2="${off[1]}" />`;
+  s += `<circle class="topo-staking__aux" cx="${off[0]}" cy="${off[1]}" r="2" />`;
+  s += `<rect class="topo-staking__stake" x="${corner[0] - 3}" y="${corner[1] - 3}" width="6" height="6" />`;
+  s += `<text class="topo-staking__coord" x="${corner[0] + 8}" y="${corner[1] + 4}">${(lat - 0.001).toFixed(5)}°N</text>`;
+  return s;
+}
+
+// Объёмы (карьер): изолинии-контуры карьера + заливка выемки/насыпи + штриховка бортов
+function genVolumes(rng) {
+  const cx = 120, cy = 68;
+  let s = '';
+  s += `<ellipse class="topo-volumes__fill" cx="${cx}" cy="${cy}" rx="100" ry="54" />`;
+  s += `<ellipse class="topo-volumes__cut" cx="${cx}" cy="${cy}" rx="80" ry="43" />`;
+  for (let i = 0; i < 4; i++) {
+    const rx = 26 + i * 16, ry = 14 + i * 9;
+    s += `<ellipse class="topo-volumes__iso" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" />`;
+  }
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2;
+    const x1 = cx + Math.cos(a) * 80, y1 = cy + Math.sin(a) * 43;
+    const x2 = cx + Math.cos(a) * 94, y2 = cy + Math.sin(a) * 50;
+    s += `<line class="topo-volumes__hatch" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
+  }
+  return s;
 }
 
 function mulberry(seed) {

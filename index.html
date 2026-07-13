@@ -17,18 +17,31 @@
         radial-gradient(circle at 70% 75%, rgba(255,107,53,0.08), transparent 55%);
       color: #8fa5a2; font-family: 'Space Grotesk', system-ui, sans-serif;
     }
-    .preloader__inner { width: min(560px, 90vw); padding: 2rem 1.5rem; }
-    .preloader__brand { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; font-weight: 700; color: #e6f0ee; }
-    .preloader__icon { color: #2dd4a7; filter: drop-shadow(0 0 8px rgba(45,212,167,0.6)); animation: criticalSpin 2.4s linear infinite; }
+    .preloader__inner { width: min(560px, 90vw); padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1.1rem; }
+    .preloader__reticle { width: 96px; height: 96px; position: relative; }
+    .preloader__reticle-svg { width: 100%; height: 100%; }
+    .preloader__ring { fill: none; stroke: rgba(45,212,167,0.28); stroke-width: 1; }
+    .preloader__ring--inner { stroke: rgba(45,212,167,0.18); stroke-dasharray: 4 6; }
+    .preloader__hub { fill: #ff6b35; }
+    .preloader__sweep { transform-origin: 60px 60px; animation: criticalSpin 2.4s linear infinite; }
+    .preloader__sweep line { stroke: rgba(45,212,167,0.55); stroke-width: 1.2; }
+    .preloader__sweep-dot { fill: #2dd4a7; }
+    .preloader__cross line { stroke: rgba(45,212,167,0.35); stroke-width: 1; }
     @keyframes criticalSpin { to { transform: rotate(360deg); } }
+    .preloader__brand { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: #e6f0ee; }
+    .preloader__name { font-size: 1.1rem; letter-spacing: -0.01em; }
     .preloader__name-accent { color: #ff6b35; }
-    .preloader__log { display: flex; flex-direction: column; gap: 0.4rem; min-height: 8rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
-    .preloader__line { display: flex; gap: 0.5rem; opacity: 0; animation: criticalLineIn 0.3s ease forwards; }
-    .preloader__prompt { color: #2dd4a7; }
-    .preloader__text { color: #8fa5a2; flex: 1; }
-    .preloader__ok { color: #44ff88; }
-    .preloader__bar { margin-top: 1.25rem; height: 2px; width: 100%; background: #1f3a3f; border-radius: 2px; overflow: hidden; }
-    .preloader__bar-fill { height: 100%; width: 0%; background: linear-gradient(135deg,#2dd4a7,#ff6b35); box-shadow: 0 0 10px rgba(45,212,167,0.5); transition: width 0.35s ease; }
+    .preloader__calib { font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; font-weight: 400; letter-spacing: 0.16em; text-transform: uppercase; color: #5d7775; }
+    .preloader__log { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; min-height: 2.4rem; font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; }
+    .preloader__badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 4px 10px; border-radius: 100px; border: 1px solid rgba(31,58,63,0.8); background: rgba(15,28,32,0.7); opacity: 0; animation: criticalLineIn 0.3s ease forwards; }
+    .preloader__badge--ok { border-color: rgba(45,212,167,0.4); color: #2dd4a7; }
+    .preloader__badge--wait { color: #8fa5a2; }
+    .preloader__badge-code { font-weight: 500; letter-spacing: 0.06em; color: inherit; opacity: 0.8; }
+    .preloader__badge-text { color: #cfdedd; }
+    .preloader__badge--ok .preloader__badge-tick::before { content: "✓"; color: #2dd4a7; }
+    .preloader__badge--wait .preloader__badge-tick::before { content: "◌"; color: #5d7775; }
+    .preloader__bar { margin-top: 0.4rem; height: 2px; width: 100%; background: #1f3a3f; border-radius: 2px; overflow: hidden; }
+    .preloader__bar-fill { height: 100%; width: 0%; background: linear-gradient(135deg,#2dd4a7,#ff6b35); transition: width 0.35s ease; }
     @keyframes criticalLineIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   </style>
   <noscript>
@@ -101,9 +114,18 @@
 
   <div class="preloader" id="preloader" aria-hidden="true">
     <div class="preloader__inner">
+      <div class="preloader__reticle" aria-hidden="true">
+        <svg viewBox="0 0 120 120" class="preloader__reticle-svg">
+          <circle cx="60" cy="60" r="52" class="preloader__ring preloader__ring--outer"/>
+          <circle cx="60" cy="60" r="38" class="preloader__ring preloader__ring--inner"/>
+          <circle cx="60" cy="60" r="2.5" class="preloader__hub"/>
+          <g class="preloader__sweep"><line x1="60" y1="60" x2="60" y2="10"/><circle cx="60" cy="14" r="2.4" class="preloader__sweep-dot"/></g>
+          <g class="preloader__cross"><line x1="60" y1="4" x2="60" y2="20"/><line x1="60" y1="100" x2="60" y2="116"/><line x1="4" y1="60" x2="20" y2="60"/><line x1="100" y1="60" x2="116" y2="60"/></g>
+        </svg>
+      </div>
       <div class="preloader__brand">
-        <span class="preloader__icon">◈</span>
         <span class="preloader__name">Гео<span class="preloader__name-accent">Точка</span></span>
+        <span class="preloader__calib">калибровка тахеометра</span>
       </div>
       <div class="preloader__log" id="preloader-log"></div>
       <div class="preloader__bar"><div class="preloader__bar-fill" id="preloader-bar"></div></div>
@@ -118,11 +140,12 @@
       </a>
       <nav class="nav" aria-label="Основная навигация">
         <ul class="nav__list">
-          <li><a href="#services" class="nav__link">Услуги</a></li>
+          <li><a href="#instruments" class="nav__link">Инструменты</a></li>
           <li><a href="#objects" class="nav__link">Объекты</a></li>
           <li><a href="#zones" class="nav__link">Зоны выезда</a></li>
+          <li><a href="#fieldlog" class="nav__link">Полевой журнал</a></li>
           <li><a href="#calculator" class="nav__link">Стоимость</a></li>
-          <li><a href="#process" class="nav__link">Как мы работаем</a></li>
+          <li><a href="#equipment" class="nav__link">Оборудование</a></li>
           <li><a href="#faq" class="nav__link">FAQ</a></li>
         </ul>
       </nav>
@@ -208,23 +231,15 @@
       </button>
     </section>
 
-    <!-- ============ LIVE-ТЕЛЕМЕТРИЯ ============ -->
-    <section class="ticker" id="ticker" aria-label="Журнал последних работ">
-      <div class="ticker__inner">
-        <span class="ticker__live"><span class="ticker__pulse" aria-hidden="true"></span>журнал работ</span>
-        <ul class="ticker__list" id="ticker-list"></ul>
-      </div>
-    </section>
-
-    <!-- ============ УСЛУГИ ============ -->
-    <section class="services section" id="services">
+    <!-- ============ ИНСТРУМЕНТЫ БРИГАДЫ (бывшие services) ============ -->
+    <section class="instruments section" id="instruments">
       <div class="container">
         <div class="section__header">
-          <span class="section__tag">Услуги</span>
-          <h2 class="section__title">Полный цикл геодезических работ</h2>
-          <p class="section__desc">От топосъёмки до постановки на кадастровый учёт — без посредников и переплат.</p>
+          <span class="section__tag">Инструменты</span>
+          <h2 class="section__title">Ящик с инструментами бригады</h2>
+          <p class="section__desc">Не «услуги плиткой», а то, чем реально работаем в поле: тахеометр, GNSS, нивелир, дрон.</p>
         </div>
-        <div class="services__grid" id="services-grid"></div>
+        <div class="instruments__grid" id="instruments-grid"></div>
       </div>
     </section>
 
@@ -260,6 +275,32 @@
             <div id="zones-map" class="zones__map" aria-label="Карта зон обслуживания"></div>
           </div>
           <aside class="zones__controls" id="zones-controls"></aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ПОЛЕВОЙ ЖУРНАЛ (бывшие process + ticker) ============ -->
+    <section class="fieldlog section" id="fieldlog">
+      <div class="container">
+        <div class="section__header">
+          <span class="section__tag">Полевой журнал</span>
+          <h2 class="section__title">Журнал наблюдений бригады</h2>
+          <p class="section__desc">Этапы работ — как записи в полевом журнале: пикеты, отсчёты по рейке, станции и время.</p>
+        </div>
+        <div class="fieldlog__panel">
+          <ol class="fieldlog__phases" id="fieldlog-phases"></ol>
+          <div class="fieldlog__feed" id="fieldlog-feed" aria-label="Бортовой журнал бригад">
+            <div class="fieldlog__feed-head">
+              <span class="fieldlog__feed-pulse" aria-hidden="true"></span>
+              <span>Бортовой журнал</span>
+            </div>
+            <div class="fieldlog__table" id="fieldlog-table"></div>
+            <div class="fieldlog__brigades-head">
+              <span class="fieldlog__feed-pulse" aria-hidden="true"></span>
+              <span>Бригады на связи</span>
+            </div>
+            <div class="fieldlog__brigades" id="fieldlog-brigades"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -306,25 +347,15 @@
       </div>
     </section>
 
-    <!-- ============ ПРЕИМУЩЕСТВА ============ -->
-    <section class="advantages section" id="advantages">
+    <!-- ============ ОБОРУДОВАНИЕ / ТОЧНОСТЬ ПРИБОРОВ (вместо advantages) ============ -->
+    <section class="equipment section" id="equipment">
       <div class="container">
         <div class="section__header">
-          <span class="section__tag">Почему мы</span>
-          <h2 class="section__title">За что нас рекомендуют заказчикам</h2>
+          <span class="section__tag">Оборудование</span>
+          <h2 class="section__title">Парок приборов и заявленная точность</h2>
+          <p class="section__desc">Каждая модель поверена и аттестована. Точность подтверждается свидетельствами метрологической службы.</p>
         </div>
-        <div class="advantages__grid" id="advantages-grid"></div>
-      </div>
-    </section>
-
-    <!-- ============ ПРОЦЕСС ============ -->
-    <section class="process section" id="process">
-      <div class="container">
-        <div class="section__header">
-          <span class="section__tag">Процесс</span>
-          <h2 class="section__title">Как проходит заказ от заявки до акта</h2>
-        </div>
-        <ol class="process__timeline" id="process-timeline"></ol>
+        <div class="equipment__table" id="equipment-grid"></div>
       </div>
     </section>
 
@@ -420,13 +451,13 @@
         <p class="footer__tagline">Геодезия, межевание и кадастр с точностью до сантиметра</p>
       </div>
       <div class="footer__links">
-        <h4 class="footer__heading">Услуги</h4>
+        <h4 class="footer__heading">Инструменты</h4>
         <ul>
-          <li><a href="#services">Топосъёмка</a></li>
-          <li><a href="#services">Межевание</a></li>
-          <li><a href="#services">Кадастр</a></li>
-          <li><a href="#services">Вынос границ</a></li>
-          <li><a href="#services">Геоподоснова</a></li>
+          <li><a href="#instruments">Тахеометр</a></li>
+          <li><a href="#instruments">GNSS RTK</a></li>
+          <li><a href="#instruments">Нивелир</a></li>
+          <li><a href="#instruments">БПЛА-фотограмметрия</a></li>
+          <li><a href="#equipment">Оборудование</a></li>
         </ul>
       </div>
       <div class="footer__links">
